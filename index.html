@@ -122,28 +122,33 @@
             setTimeout(() => coin.remove(), 1000);
         }
 
-        // Real Rewarded Video Ad (AdsGram)
-        function watchRewardedAd() {
-            const blockId = 18486; // ←←← এখানে আপনার AdsGram Block ID দিন! (adsgram.ai থেকে পাবেন)
+        
 
-            if (!window.AdController) {
-                alert("AdsGram SDK loading... Try again in a moment!");
-                return;
-            }
+// Monetag Rewarded Interstitial Ad
+function watchRewardedAd() {
+    // Monetag-এর global show function (যেমন show_10362739)
+    // আপনার zone ID অনুযায়ী চেঞ্জ করুন, উদাহরণ: window.show_10362739
+    const showAdFunction = window.show_10362739; // ←←← এখানে আপনার show_XXXXX ফাংশনের নাম দিন!!!
 
-            AdController.show({ blockId })
-                .then((result) => {
-                    if (result === 'viewed') {
-                        points += 300;
-                        updatePoints();
-                        alert("Ad fully watched! +300 Points 🎉\n(Real earnings for developer!)");
-                    } else {
-                        alert("Ad closed early. No reward this time 😔");
-                    }
-                })
-                .catch((error) => {
-                    alert("No ad available or error. Try later! 🚀");
-                });
+    if (typeof showAdFunction !== 'function') {
+        alert("Ad SDK loading... Try again in a moment! ⏳");
+        return;
+    }
+
+    // অ্যাড দেখানো শুরু
+    showAdFunction()
+        .then(() => {
+            // ইউজার পুরো অ্যাড দেখেছে → রিওয়ার্ড দিন
+            points += 300;
+            updatePoints();
+            alert("Ad fully watched! +300 Points 🎉\n(Real earnings for you via Monetag!)");
+        })
+        .catch((error) => {
+            // অ্যাড স্কিপ বা এরর → নো রিওয়ার্ড
+            console.error("Ad error:", error);
+            alert("Ad closed early or no ad available. No reward this time 😔\nTry later!");
+        });
+}
         }
 
         // Daily Reward
@@ -266,6 +271,7 @@
     </script>
 </body>
 </html>
+
 
 
 
