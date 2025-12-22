@@ -43,8 +43,13 @@
     <button onclick="watchAd()">Watch Ad for +100 Points</button>
 
     <script>
-        let points = 0;
+        let points = parseInt(localStorage.getItem('points') || '0');
         const pointsDisplay = document.getElementById('points');
+
+        function updatePoints() {
+            pointsDisplay.innerText = `Points: ${points}`;
+            localStorage.setItem('points', points);
+        }
 
         function tap() {
             points += 10;
@@ -57,9 +62,7 @@
             updatePoints();
         }
 
-        function updatePoints() {
-            pointsDisplay.innerText = `Points: ${points}`;
-        }
+        updatePoints(); // লোড হওয়ার সাথে সাথে দেখাবে
 
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
