@@ -6,15 +6,40 @@
     <title>My Earn Game</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: Arial; text-align: center; background: #000; color: white; }
-        #tap-button { width: 200px; height: 200px; border-radius: 50%; background: gold; margin: 50px auto; font-size: 50px; }
-        #points { font-size: 40px; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #000;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        #tap-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: gold;
+            margin: 50px auto;
+            font-size: 50px;
+            border: none;
+            cursor: pointer;
+        }
+        #points {
+            font-size: 40px;
+            margin: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px;
+        }
     </style>
 </head>
 <body>
     <h1>Tap to Earn Points!</h1>
     <div id="points">Points: 0</div>
     <button id="tap-button" onclick="tap()">💰 TAP 💰</button>
+    <br>
     <button onclick="watchAd()">Watch Ad for +100 Points</button>
 
     <script>
@@ -27,7 +52,7 @@
         }
 
         function watchAd() {
-            // পরে এখানে rewarded ad ইন্টিগ্রেট করব
+            // পরে এখানে রিয়েল অ্যাড ইন্টিগ্রেট করব
             alert("Ad watched! +100 points");
             points += 100;
             updatePoints();
@@ -37,9 +62,11 @@
             pointsDisplay.innerText = `Points: ${points}`;
         }
 
-        // Telegram WebApp ready
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand(); // ফুল স্ক্রিন
+        // Telegram WebApp initialize
+        if (window.Telegram && Telegram.WebApp) {
+            Telegram.WebApp.ready();
+            Telegram.WebApp.expand();
+        }
     </script>
 </body>
 </html>
