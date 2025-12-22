@@ -3,57 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src='//libtl.com/sdk.js' data-zone='10362739' data-sdk='show_10362739'></script>
     <title>Tap Earn Game</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- AdsGram SDK for Rewarded Video Ads -->
-    <script src="https://cdn.adsgram.ai/sdk.js" async></script>
+    <!-- Monetag SDK - আপনার ড্যাশবোর্ড থেকে চেক করুন -->
+    <script src="//libtl.com/sdk.js" data-zone="10362739" data-sdk="show_10362739" async></script>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            background: linear-gradient(#000, #001133); 
-            color: white; 
-            margin: 0; 
-            padding: 20px; 
-            overflow: hidden; 
-        }
+        body { font-family: Arial, sans-serif; text-align: center; background: linear-gradient(#000, #001133); color: white; margin: 0; padding: 20px; overflow: hidden; }
         h1 { font-size: 28px; }
         #username { font-size: 20px; margin: 10px; color: gold; }
         #points { font-size: 40px; margin: 20px; }
+        #tap-area { position: relative; width: 250px; height: 250px; margin: 40px auto; }
         #tap-button { 
-            width: 220px; height: 220px; border-radius: 50%; 
-            background: radial-gradient(gold, orange); margin: 40px auto; 
-            font-size: 60px; border: 5px solid yellow; cursor: pointer; 
-            box-shadow: 0 0 20px gold; 
+            width: 200px; height: 200px; background: transparent; border: none; cursor: pointer; 
+            font-size: 150px; animation: pulse 2s infinite; 
         }
-        #tap-button:active { transform: scale(0.95); }
-        button { 
-            padding: 12px 24px; font-size: 18px; margin: 10px; 
-            background: #007bff; color: white; border: none; border-radius: 10px; cursor: pointer; 
-        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        #tap-button:active { transform: scale(0.9); animation: none; }
+        button { padding: 12px 24px; font-size: 18px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 10px; cursor: pointer; }
         button:hover { background: #0056b3; }
-        button:disabled { background: #666; cursor: not-allowed; }
-        .coin { 
-            position: absolute; font-size: 40px; pointer-events: none; 
-            animation: fly 1s ease-out forwards; 
-        }
-        @keyframes fly { 
-            0% { opacity: 1; transform: translate(0,0) scale(1); } 
-            100% { opacity: 0; transform: translate(var(--x), -200px) scale(0); } 
-        }
-        /* Spin Wheel Styles */
-        #spin-modal { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; 
-        }
-        #wheel-container { 
-            width: 300px; height: 400px; background: #111; border-radius: 20px; padding: 20px; 
-        }
-        #wheel { width: 300px; height: 300px; }
-        #wheel-pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 40px; z-index: 10; }
-        #spin-btn { background: gold; color: black; font-weight: bold; font-size: 20px; padding: 15px; }
-        #result { margin-top: 20px; font-size: 24px; color: lime; }
+        .floating-text { position: absolute; font-size: 30px; font-weight: bold; color: gold; pointer-events: none; animation: floatUp 1s ease-out forwards; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
+        #sound-toggle { background: #28a745; }
+        #spin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
+        /* বাকি স্পিন স্টাইল আগের মতো */
+        #wheel-container { width: 320px; background: #111; border-radius: 20px; padding: 20px; }
+        #wheel-pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 50px; z-index: 10; }
+        #result { margin-top: 20px; font-size: 28px; color: lime; font-weight: bold; }
         .confetti { position: absolute; width: 10px; height: 10px; background: gold; pointer-events: none; animation: confetti-fall 3s linear forwards; }
         @keyframes confetti-fall { 0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
     </style>
@@ -62,12 +37,17 @@
     <h1>🚀 Tap to Earn Points! 🚀</h1>
     <div id="username">Welcome!</div>
     <div id="points">Points: 0</div>
-    <button id="tap-button">💰 TAP 💰</button>
+    
+    <div id="tap-area">
+        <button id="tap-button">🪙</button>
+    </div>
+    
+    <button id="sound-toggle" onclick="toggleSound()">🔊 Sound ON</button>
     <br>
-    <button onclick="watchRewardedAd()">📺 Watch Real Ad +300 Points (Earn Money for Me!)</button>
+    <button onclick="watchRewardedAd()">📺 Watch Ad +300 Points</button>
     <button onclick="dailyReward()">🎁 Daily Bonus</button>
     <button onclick="showReferral()">👥 Invite Friends</button>
-    <button onclick="spinToWin()">🎡 Spin to Win (Free every 8h)</button>
+    <button onclick="spinToWin()">🎡 Spin to Win</button>
 
     <!-- Spin Modal -->
     <div id="spin-modal">
@@ -76,25 +56,46 @@
             <canvas id="wheel" width="300" height="300"></canvas>
             <button id="spin-btn" onclick="startSpin()">SPIN!</button>
             <div id="result"></div>
-            <button onclick="closeSpinModal()" style="margin-top:20px;">Close</button>
+            <button onclick="closeSpinModal()">Close</button>
         </div>
     </div>
 
     <script>
+        // Sounds (free royalty-free links)
+        const tapSound = new Audio('https://cdn.freesound.org/previews/654/654541_5674468-lq.mp3'); // coin collect
+        const spinTickSound = new Audio('https://freesound.org/data/previews/244/244774_4419067-lq.mp3'); // wheel tick
+        const winSound = new Audio('https://mixkit.co/free-sound-effects/win/'); // confetti celebration (example, change if needed)
+
+        let soundEnabled = localStorage.getItem('soundEnabled') !== 'false'; // default ON
+        updateSoundToggle();
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('soundEnabled', soundEnabled);
+            updateSoundToggle();
+        }
+
+        function updateSoundToggle() {
+            document.getElementById('sound-toggle').innerText = soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF';
+        }
+
+        function playSound(audio) {
+            if (soundEnabled) {
+                audio.currentTime = 0;
+                audio.play().catch(() => {}); // mute error ignore
+            }
+        }
+
         let points = parseInt(localStorage.getItem('points') || '0');
         const pointsDisplay = document.getElementById('points');
         const usernameDisplay = document.getElementById('username');
         const tapButton = document.getElementById('tap-button');
-        const spinModal = document.getElementById('spin-modal');
 
-        // Telegram Integration
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
             const user = Telegram.WebApp.initDataUnsafe.user;
-            if (user) {
-                usernameDisplay.innerText = `Welcome, ${user.first_name || 'Player'}! 👋`;
-            }
+            if (user) usernameDisplay.innerText = `Welcome, ${user.first_name}! 👋`;
         }
 
         function updatePoints() {
@@ -102,176 +103,36 @@
             localStorage.setItem('points', points);
         }
 
-        // Tap Animation
+        // Enhanced Tap Animation with +points floating
         tapButton.addEventListener('click', function(e) {
             points += 20;
             updatePoints();
-            for (let i = 0; i < 5; i++) {
-                createCoin(e.pageX || e.touches[0].pageX, e.pageY || e.touches[0].pageY);
-            }
+            playSound(tapSound);
+
+            // Floating +20 text
+            const floatText = document.createElement('div');
+            floatText.className = 'floating-text';
+            floatText.innerText = '+20';
+            floatText.style.left = `${e.pageX - 30}px`;
+            floatText.style.top = `${e.pageY - 50}px`;
+            document.body.appendChild(floatText);
+            setTimeout(() => floatText.remove(), 1000);
         });
 
-        function createCoin(x, y) {
-            const coin = document.createElement('div');
-            coin.className = 'coin';
-            coin.innerText = '🪙';
-            coin.style.left = `${x + (Math.random() - 0.5) * 100}px`;
-            coin.style.top = `${y}px`;
-            coin.style.setProperty('--x', `${(Math.random() - 0.5) * 200}px`);
-            document.body.appendChild(coin);
-            setTimeout(() => coin.remove(), 1000);
-        }
-
-        
-
-// Monetag Rewarded Interstitial Ad
-function watchRewardedAd() {
-    // Monetag-এর global show function (যেমন show_10362739)
-    // আপনার zone ID অনুযায়ী চেঞ্জ করুন, উদাহরণ: window.show_10362739
-    const showAdFunction = window.show_10362739; // ←←← এখানে আপনার show_XXXXX ফাংশনের নাম দিন!!!
-
-    if (typeof showAdFunction !== 'function') {
-        alert("Ad SDK loading... Try again in a moment! ⏳");
-        return;
-    }
-
-    // অ্যাড দেখানো শুরু
-    showAdFunction()
-        .then(() => {
-            // ইউজার পুরো অ্যাড দেখেছে → রিওয়ার্ড দিন
-            points += 300;
-            updatePoints();
-            alert("Ad fully watched! +300 Points 🎉\n(Real earnings for you via Monetag!)");
-        })
-        .catch((error) => {
-            // অ্যাড স্কিপ বা এরর → নো রিওয়ার্ড
-            console.error("Ad error:", error);
-            alert("Ad closed early or no ad available. No reward this time 😔\nTry later!");
-        });
-}
-        }
-
-        // Daily Reward
-        function dailyReward() {
-            const lastLogin = localStorage.getItem('lastLogin');
-            const today = new Date().toDateString();
-            if (lastLogin !== today) {
-                points += 500;
+        // Monetag Ad (আপনার zone ID দিয়ে)
+        function watchRewardedAd() {
+            const showAd = window.show_10362739;
+            if (typeof showAd !== 'function') return alert("Ad loading...");
+            showAd().then(() => {
+                points += 300;
                 updatePoints();
-                localStorage.setItem('lastLogin', today);
-                alert("Daily Bonus Claimed! +500 Points 💎");
-            } else {
-                alert("Already claimed today! Come back tomorrow 📅");
-            }
+                alert("Ad watched! +300 Points 🎉");
+            }).catch(() => alert("Ad closed early 😔"));
         }
 
-        // Referral
-        function showReferral() {
-            if (!Telegram.WebApp) return alert("Referral works only in Telegram!");
-            const userId = Telegram.WebApp.initDataUnsafe.user?.id || 'unknown';
-            const botUsername = 'myearninggameboy_bot'; // ←←← আপনার বটের ইউজারনেম দিন (যেমন MyEarnGameBot)
-            const referralLink = `https://t.me/${botUsername}?start=ref_${userId}`;
-            Telegram.WebApp.openTelegramLink(referralLink);
-            alert(`Your Referral Link:\n${referralLink}\nEarn 100 points per friend! 🔥`);
-        }
-
-        // Spin to Win
-        const prizes = [
-            { points: 1000, color: '#FFD700', text: '1000 pts!' },
-            { points: 500, color: '#FFA500', text: '500 pts!' },
-            { points: 200, color: '#FF4500', text: '200 pts!' },
-            { points: 100, color: '#32CD32', text: '100 pts!' },
-            { points: 50, color: '#00BFFF', text: '50 pts!' },
-            { points: 0, color: '#FF69B4', text: 'Try Again' }
-        ];
-        let currentRotation = 0;
-
-        function spinToWin() {
-            const lastSpin = localStorage.getItem('lastSpin');
-            const now = Date.now();
-            if (lastSpin && now - parseInt(lastSpin) < 8 * 60 * 60 * 1000) {
-                alert("Free spin every 8 hours! ⏰");
-                return;
-            }
-            spinModal.style.display = 'flex';
-            drawWheel();
-            localStorage.setItem('lastSpin', now);
-        }
-
-        function closeSpinModal() {
-            spinModal.style.display = 'none';
-        }
-
-        function drawWheel() {
-            const canvas = document.getElementById('wheel');
-            const ctx = canvas.getContext('2d');
-            const centerX = 150, centerY = 150, radius = 150;
-            const angle = (Math.PI * 2) / prizes.length;
-
-            ctx.clearRect(0, 0, 300, 300);
-            for (let i = 0; i < prizes.length; i++) {
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.arc(centerX, centerY, radius, i * angle, (i + 1) * angle);
-                ctx.fillStyle = prizes[i].color;
-                ctx.fill();
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-
-                ctx.save();
-                ctx.translate(centerX, centerY);
-                ctx.rotate(i * angle + angle / 2);
-                ctx.textAlign = 'right';
-                ctx.fillStyle = '#000';
-                ctx.font = 'bold 18px Arial';
-                ctx.fillText(prizes[i].text, radius - 20, 10);
-                ctx.restore();
-            }
-        }
-
-        function startSpin() {
-            document.getElementById('spin-btn').disabled = true;
-            const spins = 4 + Math.random();
-            const randDegree = Math.random() * 360;
-            currentRotation += spins * 360 + randDegree;
-            document.getElementById('wheel').style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
-            document.getElementById('wheel').style.transform = `rotate(${currentRotation}deg)`;
-
-            setTimeout(() => {
-                const normalized = currentRotation % 360;
-                const segment = Math.floor((360 - normalized) / 60);
-                const prizeIndex = segment % prizes.length;
-                const prize = prizes[prizeIndex];
-                if (prize.points > 0) {
-                    points += prize.points;
-                    updatePoints();
-                    showConfetti();
-                    document.getElementById('result').innerText = `Won ${prize.points} Points! 🎉`;
-                } else {
-                    document.getElementById('result').innerText = 'Try Again Next Time 😅';
-                }
-                document.getElementById('spin-btn').disabled = false;
-            }, 4200);
-        }
-
-        function showConfetti() {
-            for (let i = 0; i < 60; i++) {
-                const conf = document.createElement('div');
-                conf.className = 'confetti';
-                conf.style.left = Math.random() * 100 + 'vw';
-                conf.style.background = `hsl(${Math.random()*360}, 100%, 50%)`;
-                conf.style.animationDelay = Math.random() * 3 + 's';
-                document.body.appendChild(conf);
-                setTimeout(() => conf.remove(), 3000);
-            }
-        }
+        // বাকি ফিচার (daily, referral, spin) আগের মতো রাখুন – স্পিনে playSound(spinTickSound); এবং জয়ে playSound(winSound);
 
         updatePoints();
     </script>
 </body>
 </html>
-
-
-
-
