@@ -52,7 +52,6 @@
         }
 
         function watchAd() {
-            // পরে এখানে রিয়েল অ্যাড ইন্টিগ্রেট করব
             alert("Ad watched! +100 points");
             points += 100;
             updatePoints();
@@ -62,7 +61,6 @@
             pointsDisplay.innerText = `Points: ${points}`;
         }
 
-        // Telegram WebApp initialize
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
