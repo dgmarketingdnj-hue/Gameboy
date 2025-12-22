@@ -163,7 +163,7 @@
         function showReferral() {
             if (!Telegram.WebApp) return alert("Referral works only in Telegram!");
             const userId = Telegram.WebApp.initDataUnsafe.user?.id || 'unknown';
-            const botUsername = 'YourBotUsername_bot'; // ←←← আপনার বটের ইউজারনেম দিন (যেমন MyEarnGameBot)
+            const botUsername = 'myearninggameboy_bot'; // ←←← আপনার বটের ইউজারনেম দিন (যেমন MyEarnGameBot)
             const referralLink = `https://t.me/${botUsername}?start=ref_${userId}`;
             Telegram.WebApp.openTelegramLink(referralLink);
             alert(`Your Referral Link:\n${referralLink}\nEarn 100 points per friend! 🔥`);
@@ -265,3 +265,4 @@
     </script>
 </body>
 </html>
+
