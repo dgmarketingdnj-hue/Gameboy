@@ -19,7 +19,6 @@
             height: 100vh;
             user-select: none;
             -webkit-user-select: none;
-            touch-action: manipulation;
         }
         h1 { 
             font-size: clamp(20px, 5vw, 28px); 
@@ -96,85 +95,31 @@
             transition: all 0.2s ease;
             min-height: 50px;
         }
-        button:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 6px 20px rgba(0,123,255,0.6);
-        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,123,255,0.6); }
         button:active { transform: translateY(0); }
-        button:disabled { background: #666; cursor: not-allowed; transform: none; }
-        #sound-toggle { 
-            background: linear-gradient(45deg, #28a745, #20c997) !important;
-            grid-column: span 2;
-        }
-        .floating-text { 
-            position: fixed; 
-            font-size: clamp(24px, 6vw, 36px); 
-            font-weight: bold; 
-            color: #FFD700; 
-            pointer-events: none; 
-            z-index: 100;
-            text-shadow: 0 0 10px gold;
-            animation: floatUp 1.2s ease-out forwards;
-        }
-        @keyframes floatUp { 
-            0% { opacity: 1; transform: translateY(0) scale(1); } 
-            100% { opacity: 0; transform: translateY(-120px) scale(1.2); } 
-        }
-        .coin { 
-            position: fixed; 
-            font-size: clamp(30px, 8vw, 45px); 
-            pointer-events: none; 
-            z-index: 50;
-            animation: coinFly 1s ease-out forwards;
-        }
-        @keyframes coinFly { 
-            0% { opacity: 1; transform: translate(0,0) scale(1) rotate(0deg); } 
-            50% { opacity: 1; transform: translate(var(--dx), var(--dy1)) scale(1.2) rotate(180deg); }
-            100% { opacity: 0; transform: translate(var(--dx), var(--dy2)) scale(0.5) rotate(360deg); }
-        }
-        /* Modals */
-        .modal { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.9); 
-            z-index: 1000; 
-            justify-content: center; 
-            align-items: center; 
-            padding: 20px;
-        }
-        .modal-content { 
-            background: linear-gradient(135deg, #111, #222); 
-            border-radius: 20px; 
-            padding: 25px; 
-            max-width: 90vw; 
-            max-height: 90vh; 
-            overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-        }
+        button:disabled { background: #666; cursor: not-allowed; }
+        #sound-toggle { background: linear-gradient(45deg, #28a745, #20c997) !important; grid-column: span 2; }
+        .floating-text { position: fixed; font-size: clamp(24px, 6vw, 36px); font-weight: bold; color: #FFD700; pointer-events: none; z-index: 100; text-shadow: 0 0 10px gold; animation: floatUp 1.2s ease-out forwards; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-120px) scale(1.2); } }
+        .coin { position: fixed; font-size: clamp(30px, 8vw, 45px); pointer-events: none; z-index: 50; animation: coinFly 1s ease-out forwards; }
+        @keyframes coinFly { 0% { opacity: 1; transform: translate(0,0) scale(1) rotate(0deg); } 50% { opacity: 1; transform: translate(var(--dx), var(--dy1)) scale(1.2) rotate(180deg); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy2)) scale(0.5) rotate(360deg); } }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: linear-gradient(135deg, #111, #222); border-radius: 20px; padding: 25px; max-width: 90vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
         .close-btn { background: #dc3545 !important; }
-        #leaderboard-list { 
-            list-style: none; padding: 0; max-height: 400px; overflow-y: auto; 
-        }
-        #leaderboard-list li { 
-            padding: 15px; 
-            border-bottom: 1px solid #444; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            font-size: 16px;
-        }
+        #leaderboard-list { list-style: none; padding: 0; max-height: 400px; overflow-y: auto; }
+        #leaderboard-list li { padding: 15px; border-bottom: 1px solid #444; display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
         #leaderboard-list li:nth-child(odd) { background: rgba(255,255,255,0.05); }
         .rank-1 { color: gold; font-size: 18px; font-weight: bold; }
         .rank-2 { color: #C0C0C0; }
         .rank-3 { color: #CD7F32; }
+        #tap-power { font-size: clamp(14px, 3.5vw, 18px); color: #FFD700; margin: 10px 0; font-weight: bold; }
     </style>
 </head>
 <body>
     <h1>🚀 Tap to Earn Points! 🚀</h1>
     <div id="username">Welcome Player!</div>
     <div id="points">Points: 0</div>
+    <div id="tap-power">Tap Power: +1 per tap</div>
     
     <div id="tap-area">
         <div id="tap-ring"></div>
@@ -187,7 +132,6 @@
         <button onclick="dailyReward()">🎁 Daily Bonus</button>
         <button onclick="showReferral()">👥 Invite Friends</button>
         <button onclick="spinToWin()">🎡 Spin to Win</button>
-        <!-- REMOVED DUPLICATE LEADERBOARD BUTTON -->
     </div>
 
     <!-- Spin Modal -->
@@ -199,6 +143,7 @@
             </div>
             <button id="spin-btn" onclick="startSpin()" style="background: linear-gradient(45deg, gold, orange) !important; color: black; font-size: 20px; padding: 15px 30px; margin: 20px 0;">🎡 SPIN TO WIN! 🎡</button>
             <div id="result" style="font-size: 24px; color: lime; margin: 20px 0; font-weight: bold;"></div>
+            <button id="claim-reward-btn" onclick="claimSpinReward()" style="display:none; background: #28a745 !important; font-size: 18px; padding: 12px 24px;">📺 Claim Reward (Watch Ad)</button>
             <button onclick="closeSpinModal()" class="close-btn">❌ Close</button>
         </div>
     </div>
@@ -213,13 +158,17 @@
     </div>
 
     <script>
-        // Audio (Mobile Optimized)
+        // Audio
         const tapSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAo');
         tapSound.volume = 0.3;
 
         let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
         let points = parseInt(localStorage.getItem('points') || '0');
+        let referrals = parseInt(localStorage.getItem('referrals') || '0'); // Referral count
+        let tapPower = 1 + referrals; // 1 per referral
+        let pendingSpinReward = 0; // Points to claim after ad
         let currentRotation = 0;
+
         const prizes = [
             { points: 1000, color: '#FFD700', text: '1000 PTS!' },
             { points: 500, color: '#FFA500', text: '500 PTS!' },
@@ -233,22 +182,38 @@
         const usernameDisplay = document.getElementById('username');
         const tapButton = document.getElementById('tap-button');
         const tapArea = document.getElementById('tap-area');
+        const tapPowerDisplay = document.getElementById('tap-power');
 
-        // Telegram Integration - FIXED LEADERBOARD DUPLICATE
+        // Telegram Integration
         if (window.Telegram?.WebApp) {
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
             const user = Telegram.WebApp.initDataUnsafe.user;
             if (user) {
                 usernameDisplay.innerText = `Welcome, ${user.first_name}! 👋`;
+                // Check if started with referral
+                const startParam = Telegram.WebApp.initDataUnsafe.start_param;
+                if (startParam && startParam.startsWith('ref_')) {
+                    const refId = startParam.slice(4);
+                    if (refId !== user.id.toString()) {
+                        referrals++;
+                        localStorage.setItem('referrals', referrals);
+                        tapPower = 1 + referrals;
+                        updateTapPower();
+                        alert('Referral bonus activated! 🔥');
+                    }
+                }
             }
-            // MainButton ONLY for Leaderboard - NO DUPLICATE
             Telegram.WebApp.MainButton.setText('🏆 Leaderboard').show().onClick(showLeaderboard);
         }
 
         function updatePoints() {
             pointsDisplay.innerText = `Points: ${points.toLocaleString()}`;
             localStorage.setItem('points', points);
+        }
+
+        function updateTapPower() {
+            tapPowerDisplay.innerText = `Tap Power: +${tapPower} per tap (from ${referrals} referrals)`;
         }
 
         function toggleSound() {
@@ -264,29 +229,25 @@
             }
         }
 
-        // Enhanced Mobile Tap
+        // Tap Handler
         function handleTap(e) {
             e.preventDefault();
             const rect = tapArea.getBoundingClientRect();
             const x = e.clientX || (e.touches && e.touches[0].clientX);
             const y = e.clientY || (e.touches && e.touches[0].clientY);
-            const tapX = x - rect.left - rect.width/2;
-            const tapY = y - rect.top - rect.height/2;
 
-            points += 20;
+            points += tapPower;
             updatePoints();
             playSound();
 
-            // Floating +20
             const floatText = document.createElement('div');
             floatText.className = 'floating-text';
-            floatText.innerText = '+20';
+            floatText.innerText = `+${tapPower}`;
             floatText.style.left = `${x}px`;
             floatText.style.top = `${y}px`;
             document.body.appendChild(floatText);
             setTimeout(() => floatText.remove(), 1200);
 
-            // Coin explosion
             for (let i = 0; i < 5; i++) {
                 createCoin(x, y, i);
             }
@@ -305,31 +266,40 @@
             setTimeout(() => coin.remove(), 1000);
         }
 
-        // Touch & Click Events
         tapButton.addEventListener('click', handleTap);
         tapArea.addEventListener('touchstart', handleTap, { passive: false });
-        tapArea.addEventListener('touchend', e => e.preventDefault());
 
-        // FIXED Invite Friends - আপনার BOT USERNAME দিন!
+        // Invite Friends with Copy Link
         function showReferral() {
             if (!Telegram?.WebApp) return alert('Open in Telegram!');
             const userId = Telegram.WebApp.initDataUnsafe.user?.id || 'unknown';
-            const botUsername = 'myearninggameboy_bot'; // ←←← এখানে আপনার BOT এর সঠিক username দিন!
+            const botUsername = 'myearninggameboy_bot'; // আপনার BOT username
             const link = `https://t.me/${botUsername}?start=ref_${userId}`;
-            Telegram.WebApp.openTelegramLink(link);
-            alert(`Share this link with friends!\n${link}\n\nThey join = You get bonus! 🔥`);
+
+            Telegram.WebApp.showPopup({
+                title: 'Invite Friends & Earn More!',
+                message: `Share this link:\n${link}\n\nEvery friend who joins = +1 Tap Power permanently! 🔥`,
+                buttons: [
+                    { type: 'default', text: 'Copy Link', id: 'copy' },
+                    { type: 'cancel', text: 'Close' }
+                ]
+            }, (buttonId) => {
+                if (buttonId === 'copy') {
+                    navigator.clipboard.writeText(link).then(() => {
+                        alert('Link copied to clipboard! 📋');
+                    });
+                }
+            });
         }
 
-        // Monetag Rewarded Ad
+        // Monetag Ad
         function watchRewardedAd() {
             const showAd = window.show_10362739;
-            if (typeof showAd !== 'function') {
-                return alert('Ad loading... Try again!');
-            }
+            if (typeof showAd !== 'function') return alert('Ad loading...');
             showAd().then(() => {
                 points += 300;
                 updatePoints();
-                alert('🎉 Ad Watched! +300 Points');
+                alert('🎉 +300 Points!');
             }).catch(() => alert('Ad closed early 😔'));
         }
 
@@ -343,11 +313,11 @@
                 localStorage.setItem('lastLogin', today);
                 alert('💎 Daily Bonus! +500 Points');
             } else {
-                alert('Already claimed today! Come tomorrow 📅');
+                alert('Already claimed today!');
             }
         }
 
-        // Spin Wheel Functions (আগের মতোই)
+        // Spin to Win with Ad Claim
         function spinToWin() {
             const lastSpin = localStorage.getItem('lastSpin');
             const now = Date.now();
@@ -355,6 +325,7 @@
                 return alert('Free spin every 8 hours! ⏰');
             }
             document.getElementById('spin-modal').style.display = 'flex';
+            document.getElementById('claim-reward-btn').style.display = 'none';
             drawWheel();
             localStorage.setItem('lastSpin', now);
         }
@@ -362,6 +333,7 @@
         function closeSpinModal() {
             document.getElementById('spin-modal').style.display = 'none';
             document.getElementById('result').innerText = '';
+            pendingSpinReward = 0;
         }
 
         function drawWheel() {
@@ -412,9 +384,9 @@
                 const prize = prizes[prizeIndex];
 
                 if (prize.points > 0) {
-                    points += prize.points;
-                    updatePoints();
-                    document.getElementById('result').innerHTML = `🎉 Won <span style="color: gold; font-size: 32px;">${prize.points}</span> Points!`;
+                    pendingSpinReward = prize.points;
+                    document.getElementById('result').innerHTML = `🎉 You won <span style="color: gold; font-size: 32px;">${prize.points}</span> Points!`;
+                    document.getElementById('claim-reward-btn').style.display = 'block';
                     showConfetti();
                 } else {
                     document.getElementById('result').innerText = '😅 Better luck next time!';
@@ -423,6 +395,20 @@
                 spinBtn.disabled = false;
                 spinBtn.innerText = 'SPIN AGAIN!';
             }, 4200);
+        }
+
+        function claimSpinReward() {
+            const showAd = window.show_10362739;
+            if (typeof showAd !== 'function') return alert('Ad loading...');
+            showAd().then(() => {
+                points += pendingSpinReward;
+                updatePoints();
+                alert(`🎉 Claimed ${pendingSpinReward} Points!`);
+                pendingSpinReward = 0;
+                document.getElementById('claim-reward-btn').style.display = 'none';
+            }).catch(() => {
+                alert('Ad closed early. Reward not claimed 😔');
+            });
         }
 
         function showConfetti() {
@@ -437,7 +423,6 @@
             }
         }
 
-        // Leaderboard (Local Demo)
         function showLeaderboard() {
             document.getElementById('leaderboard-modal').style.display = 'flex';
             const list = document.getElementById('leaderboard-list');
@@ -445,7 +430,7 @@
                 <li class="rank-1"><span>#1 GoldPlayer</span><span>1,250,000</span></li>
                 <li class="rank-2"><span>#2 SilverStar</span><span>987,654</span></li>
                 <li class="rank-3"><span>#3 BronzeKing</span><span>765,432</span></li>
-                <li><span>#4 ${Telegram?.WebApp?.initDataUnsafe?.user?.first_name || 'You'}</span><span>${points.toLocaleString()}</span></li>
+                <li><span>#4 You</span><span>${points.toLocaleString()}</span></li>
                 <li><span>#5 Player5</span><span>543,210</span></li>
             `;
         }
@@ -456,6 +441,7 @@
 
         // Initialize
         updatePoints();
+        updateTapPower();
         document.getElementById('sound-toggle').innerText = soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF';
         drawWheel();
     </script>
