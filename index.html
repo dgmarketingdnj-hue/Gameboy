@@ -5,132 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tap Earn Game</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Monetag SDK - আপনার ড্যাশবোর্ড থেকে চেক করুন -->
+    <script src="https://unpkg.com/@tonconnect/sdk@1.1.3/tonconnect-sdk.min.js"></script> <!-- TON Connect -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <!-- Monetag SDK -->
     <script src="//libtl.com/sdk.js" data-zone="10362739" data-sdk="show_10362739" async></script>
+    <!-- আগের স্টাইল + নতুন -->
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background: linear-gradient(#000, #001133); color: white; margin: 0; padding: 20px; overflow: hidden; }
-        h1 { font-size: 28px; }
-        #username { font-size: 20px; margin: 10px; color: gold; }
-        #points { font-size: 40px; margin: 20px; }
-        #tap-area { position: relative; width: 250px; height: 250px; margin: 40px auto; }
-        #tap-button { 
-            width: 200px; height: 200px; background: transparent; border: none; cursor: pointer; 
-            font-size: 150px; animation: pulse 2s infinite; 
-        }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        #tap-button:active { transform: scale(0.9); animation: none; }
-        button { padding: 12px 24px; font-size: 18px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 10px; cursor: pointer; }
-        button:hover { background: #0056b3; }
-        .floating-text { position: absolute; font-size: 30px; font-weight: bold; color: gold; pointer-events: none; animation: floatUp 1s ease-out forwards; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
-        #sound-toggle { background: #28a745; }
-        #spin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
-        /* বাকি স্পিন স্টাইল আগের মতো */
-        #wheel-container { width: 320px; background: #111; border-radius: 20px; padding: 20px; }
-        #wheel-pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 50px; z-index: 10; }
-        #result { margin-top: 20px; font-size: 28px; color: lime; font-weight: bold; }
-        .confetti { position: absolute; width: 10px; height: 10px; background: gold; pointer-events: none; animation: confetti-fall 3s linear forwards; }
-        @keyframes confetti-fall { 0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+        /* আগের সব স্টাইল + নতুন */
+        #leaderboard-modal, #withdraw-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1001; color: white; padding: 20px; overflow-y: auto; }
+        #leaderboard-list { list-style: none; padding: 0; }
+        #leaderboard-list li { padding: 10px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; }
+        button { /* আগের */ }
     </style>
 </head>
 <body>
-    <h1>🚀 Tap to Earn Points! 🚀</h1>
-    <div id="username">Welcome!</div>
-    <div id="points">Points: 0</div>
-    
-    <div id="tap-area">
-        <button id="tap-button">🪙</button>
-    </div>
-    
-    <button id="sound-toggle" onclick="toggleSound()">🔊 Sound ON</button>
-    <br>
-    <button onclick="watchRewardedAd()">📺 Watch Ad +300 Points</button>
-    <button onclick="dailyReward()">🎁 Daily Bonus</button>
-    <button onclick="showReferral()">👥 Invite Friends</button>
-    <button onclick="spinToWin()">🎡 Spin to Win</button>
+    <!-- আগের HTML + নতুন বাটন -->
+    <button onclick="showLeaderboard()">🏆 Leaderboard</button>
+    <button onclick="showWithdraw()">💰 Withdraw to TON</button>
 
-    <!-- Spin Modal -->
-    <div id="spin-modal">
-        <div id="wheel-container">
-            <div id="wheel-pointer">🎯</div>
-            <canvas id="wheel" width="300" height="300"></canvas>
-            <button id="spin-btn" onclick="startSpin()">SPIN!</button>
-            <div id="result"></div>
-            <button onclick="closeSpinModal()">Close</button>
-        </div>
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal">
+        <h2>🏆 Global Leaderboard</h2>
+        <ul id="leaderboard-list"></ul>
+        <button onclick="closeLeaderboard()">Close</button>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdraw-modal">
+        <h2>💰 Withdraw Points to TON</h2>
+        <p>Connect wallet to claim!</p>
+        <button id="connect-wallet-btn" onclick="connectWallet()">Connect TON Wallet</button>
+        <input id="withdraw-amount" type="number" placeholder="Points (min 1000)" />
+        <button id="withdraw-btn" onclick="withdraw()" disabled>Withdraw</button>
+        <button onclick="closeWithdraw()">Close</button>
     </div>
 
     <script>
-        // Sounds (free royalty-free links)
-        const tapSound = new Audio('https://cdn.freesound.org/previews/654/654541_5674468-lq.mp3'); // coin collect
-        const spinTickSound = new Audio('https://freesound.org/data/previews/244/244774_4419067-lq.mp3'); // wheel tick
-        const winSound = new Audio('https://mixkit.co/free-sound-effects/win/'); // confetti celebration (example, change if needed)
+        // Firebase Config (আপনার project থেকে কপি করুন)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            // ... full config
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        let soundEnabled = localStorage.getItem('soundEnabled') !== 'false'; // default ON
-        updateSoundToggle();
-
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            localStorage.setItem('soundEnabled', soundEnabled);
-            updateSoundToggle();
-        }
-
-        function updateSoundToggle() {
-            document.getElementById('sound-toggle').innerText = soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF';
-        }
-
-        function playSound(audio) {
-            if (soundEnabled) {
-                audio.currentTime = 0;
-                audio.play().catch(() => {}); // mute error ignore
-            }
-        }
-
-        let points = parseInt(localStorage.getItem('points') || '0');
-        const pointsDisplay = document.getElementById('points');
-        const usernameDisplay = document.getElementById('username');
-        const tapButton = document.getElementById('tap-button');
-
-        if (window.Telegram && Telegram.WebApp) {
-            Telegram.WebApp.ready();
-            Telegram.WebApp.expand();
-            const user = Telegram.WebApp.initDataUnsafe.user;
-            if (user) usernameDisplay.innerText = `Welcome, ${user.first_name}! 👋`;
-        }
-
-        function updatePoints() {
-            pointsDisplay.innerText = `Points: ${points.toLocaleString()}`;
-            localStorage.setItem('points', points);
-        }
-
-        // Enhanced Tap Animation with +points floating
-        tapButton.addEventListener('click', function(e) {
-            points += 20;
-            updatePoints();
-            playSound(tapSound);
-
-            // Floating +20 text
-            const floatText = document.createElement('div');
-            floatText.className = 'floating-text';
-            floatText.innerText = '+20';
-            floatText.style.left = `${e.pageX - 30}px`;
-            floatText.style.top = `${e.pageY - 50}px`;
-            document.body.appendChild(floatText);
-            setTimeout(() => floatText.remove(), 1000);
+        // TON Connect
+        const connector = new TON_CONNECT_SDK.TonConnect({
+            manifestUrl: 'https://your-site.com/tonconnect-manifest.json' // manifest তৈরি করুন (GitHub demo ব্যবহার করুন)
         });
+        let walletAddress = null;
 
-        // Monetag Ad (আপনার zone ID দিয়ে)
-        function watchRewardedAd() {
-            const showAd = window.show_10362739;
-            if (typeof showAd !== 'function') return alert("Ad loading...");
-            showAd().then(() => {
-                points += 300;
-                updatePoints();
-                alert("Ad watched! +300 Points 🎉");
-            }).catch(() => alert("Ad closed early 😔"));
+        // User ID from Telegram
+        const userId = Telegram.WebApp.initDataUnsafe.user?.id;
+        const username = Telegram.WebApp.initDataUnsafe.user?.first_name || 'Player';
+
+        // Save Points to Firebase (tap-এ কল করুন)
+        async function savePoints() {
+            await db.collection('leaderboard').doc(userId).set({
+                userId, username, points,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
         }
 
-        // বাকি ফিচার (daily, referral, spin) আগের মতো রাখুন – স্পিনে playSound(spinTickSound); এবং জয়ে playSound(winSound);
+        // Leaderboard Load
+        async function showLeaderboard() {
+            const snapshot = await db.collection('leaderboard').orderBy('points', 'desc').limit(50).get();
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = '';
+            snapshot.forEach((doc, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>#${index+1} ${doc.data().username}</span><span>${doc.data().points.toLocaleString()}</span>`;
+                list.appendChild(li);
+            });
+            document.getElementById('leaderboard-modal').style.display = 'block';
+        }
+        function closeLeaderboard() { document.getElementById('leaderboard-modal').style.display = 'none'; }
+
+        // TON Wallet Connect
+        async function connectWallet() {
+            try {
+                await connector.connectWallet();
+                walletAddress = connector.connectedWallet?.account?.address;
+                document.getElementById('connect-wallet-btn').innerText = `Connected: ${walletAddress.slice(0,6)}...`;
+                document.getElementById('withdraw-btn').disabled = false;
+            } catch(e) { alert('Connect failed!'); }
+        }
+
+        // Withdraw
+        async function withdraw() {
+            const amount = parseInt(document.getElementById('withdraw-amount').value);
+            if (amount < 1000 || points < amount) return alert('Min 1000 points!');
+            
+            // Backend-এ verify + send Jetton (Node.js endpoint বানান)
+            const tx = {
+                validUntil: Math.floor(Date.now() / 1000) + 300,
+                messages: [{
+                    address: walletAddress,
+                    amount: (amount / 1000 * 1e9).toString(), // 1 point = 0.001 TON example
+                    payload: 'Withdraw'
+                }]
+            };
+            await connector.sendTransaction(tx);
+            points -= amount;
+            updatePoints();
+            savePoints();
+            alert('Withdrawn! Check wallet.');
+        }
+        function showWithdraw() { document.getElementById('withdraw-modal').style.display = 'block'; }
+        function closeWithdraw() { document.getElementById('withdraw-modal').style.display = 'none'; }
+
+        // Tap-এ savePoints() কল করুন (updatePoints-এর সাথে)
+        // আগের সব কোড রাখুন...
 
         updatePoints();
     </script>
